@@ -1,0 +1,7 @@
+.git
+.DS_Store
+.ignore
+.pijul
+zig-cache
+zig-out
+profile.json
