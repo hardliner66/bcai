@@ -15,12 +15,36 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
+    const bcai = b.createModule(.{
+        .root_source_file = .{ .path = "src/bcai.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const lib = b.addSharedLibrary(.{
+        .name = "bcai",
+        // In this case the main source file is merely a path, however, in more
+        // complicated build scripts, this could be a generated file.
+        .root_source_file = b.path("src/lib.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    lib.root_module.addImport("bcai", bcai);
+    lib.linkLibCpp();
+
+    // This declares intent for the library to be installed into the standard
+    // location when the user invokes the "install" step (the default step when
+    // running `zig build`).
+    b.installArtifact(lib);
+
     const exe = b.addExecutable(.{
-        .name = "aibc",
+        .name = "bcai",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
+    exe.root_module.addImport("bcai", bcai);
+    exe.linkLibCpp();
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
